@@ -132,10 +132,14 @@ def main(cred, cred_file, verbose):
         requests_log = logging.getLogger("requests.packages.urllib3")
         requests_log.setLevel(logging.INFO)
         requests_log.propagate = True
+    cred.obj = read_credential_from_file(cred_file)
+
+
+def read_credential_from_file(cred_file):
     with open(cred_file) as credentialFile:
         username = credentialFile.readline().strip()
         password = credentialFile.readline().strip()
-    cred.obj = ApiCredential(username, password)
+    return ApiCredential(username, password)
 
 
 @main.command("begin-scan")
@@ -253,10 +257,7 @@ def get_build_info(credential, **payload):
 @click.option("--sandbox-id")
 @click.pass_obj
 def get_build_list(credential, **payload):
-    """Gets a list of builds for an app.
-    :param credential: ApiCredential object containing api credentials.
-    :param app_id: int id of the app.
-    :param sandbox_id: int Optional id of the developer sandbox."""
+    """Gets a list of builds for an app."""
     api_endpoint = "getbuildlist.do"
     api_submit(api_endpoint, credential, payload)
 
@@ -358,9 +359,9 @@ def update_build(credential, **payload):
 @click.pass_obj
 def upload_file(credential, **payload):
     """Uploads a file"""
-    file = {'file': open(payload.pop('filename'), 'rb')}
+    module_file = {'file': open(payload.pop('filename'), 'rb')}
     api_endpoint = "uploadfile.do"
-    return api_submit(api_endpoint, credential, payload, file)
+    return api_submit(api_endpoint, credential, payload, module_file)
 
 
 def api_submit(api_endpoint, credential, payload=None, files=None):

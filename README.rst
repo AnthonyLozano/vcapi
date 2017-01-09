@@ -1,8 +1,7 @@
 vcapi
 =====
 
-vcapi is a python wrapper to veracode's upload api. It can be used either as a command line interface or as a python
-module.
+vcapi is a python cli wrapper to veracode's upload api.
 
 Usage
 -----
