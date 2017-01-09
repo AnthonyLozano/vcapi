@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='vcapi',
     packages=['vcapi'],
-    version='1.0.1.a2',
+    version='1.0.1.a3',
     description="Python API wrapper for Veracode's API",
     long_description=open('README.rst').read(),
     author="Anthony Lozano",
