@@ -102,13 +102,21 @@ class ApiCredential:
 
 
 @click.group()
-@click.option('--cred-file', default=expanduser('~')+'/.veracode-credential',
+@click.option('--cred-file', default=expanduser('~')+'/.veracoderc',
               help="Two line file containing username and password.")
 @click.option('--verbose', '-v', is_flag=True, help="Enables logging")
 @click.pass_context
 def main(cred, cred_file, verbose):
     """
-    Veracode command line interface
+    Veracode command line interface.
+    This function is the main command group for veracode's upload API.
+
+    For documentation on each command check out
+    https://analysiscenter.veracode.com/auth/helpCenter/api/c_UploadAPI_calls.html
+
+    :param cred: click context
+    :param cred_file: a file that contains your veracode username on one line, and your password on the next.
+    :param verbose: When this flag is passed, logging will be enabled for python's request lib.
     """
     if verbose:
         # Enabling debugging at http.client level (requests->urllib3->http.client)
@@ -152,15 +160,10 @@ def begin_scan(credential, **payload):
 @click.option('--sandbox-id')
 @click.option('--scan-all-nonfatal-top-level-modules/--no-scan-all-nonfatal-top-level-modules', default=False)
 @click.pass_obj
-def begin_prescan(credential, app_id, auto_scan, sandbox_id, scan_all_nonfatal_top_level_modules):
-    """Begins the prescan."""
-    payload = {
-        'app_id': app_id,
-        'auto_scan': auto_scan,
-        'scan_all_nonfatal_top_level_modules': scan_all_nonfatal_top_level_modules
-    }
-    if sandbox_id:
-        payload['sandbox_id']: sandbox_id
+def begin_prescan(credential, **payload):
+    """
+    Begins the prescan.
+    """
     api_endpoint = "beginprescan.do"
     return api_submit(api_endpoint, credential, payload)
 
@@ -194,9 +197,8 @@ def create_app(credential, **payload):
 @click.argument('app-id')
 @click.argument('version')
 @click.pass_obj
-def create_build(credential, app_id, version):
+def create_build(credential, **payload):
     """Creates a build."""
-    payload = {'app_id': app_id, 'version': version}
     api_endpoint = "createbuild.do"
     return api_submit(api_endpoint, credential, payload)
 
@@ -212,11 +214,8 @@ def delete_app(credential, **payload):
 @click.argument("app-id")
 @click.option("--sandbox-id", default=None, help="optional sandbox id")
 @click.pass_obj
-def delete_build(credential, app_id, sandbox_id):
+def delete_build(credential, **payload):
     """Deletes a build."""
-    payload = {'app_id': app_id}
-    if sandbox_id:
-        payload['sandbox_id'] = sandbox_id
     api_endpoint = "deletebuild.do"
     return api_submit(api_endpoint, credential, payload)
 

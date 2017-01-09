@@ -1,18 +1,18 @@
 vcapi
 =====
 
-vcapi is a python wrapper to veracode's upload api. It can be used either as a command line interface or as a module
-progammatically in python.
+vcapi is a python wrapper to veracode's upload api. It can be used either as a command line interface or as a python
+module.
 
 Usage
 -----
 
-Save your credentials in a two line file named .veracode-credential in your home directory, or specify a credential file
+Save your credentials in a two line file named .veracoderc in your home directory, or specify a credential file
 with the --cred-file option. The file should have your username on the first line and your password on the second line.
 
 ::
 
-    Usage: vcapi.py [OPTIONS] COMMAND [ARGS]...
+    Usage: vcapi [OPTIONS] COMMAND [ARGS]...
 
       Veracode command line interface
 
@@ -45,13 +45,13 @@ Examples
 
 List all the apps you have access to::
 
-    ./vcapi.py get-app-list
+    vcapi get-app-list
 
 Get help on a particular command::
 
-    ./vcapi.py update-app --help
+    vcapi update-app --help
 
 Perform a command with verbosity::
 
-    ./vcapi.py -v get-app-list
+    vcapi -v get-app-list
 
