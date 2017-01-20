@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3
+#!/usr/local/bin/python3 -u
 import click
 from clint.textui.progress import Bar as ProgressBar
 import requests
@@ -382,7 +382,7 @@ def upload_file(credential, app_id, filename, sandbox_id, save_as):
 
 
 def create_callback(encoder):
-    bar = ProgressBar(expected_size=encoder.len, filled_char='=')
+    bar = ProgressBar(expected_size=encoder.len, filled_char='=', hide=False)
 
     def callback(monitor):
         bar.show(monitor.bytes_read)
