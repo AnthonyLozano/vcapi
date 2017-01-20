@@ -3,7 +3,8 @@
 .idea/
 MANIFEST
 dist/
-tests/
+../veracode/tests/
 vcapi.egg-info/
 vcapi/__pycache__/
 build/
+/vcapi/HelloWorld.class

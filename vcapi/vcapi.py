@@ -1,12 +1,14 @@
 #!/usr/local/bin/python3
 import click
+from clint.textui.progress import Bar as ProgressBar
 import requests
+from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
 import logging
 from os.path import expanduser
 
 VERACODE_API_URL = 'https://analysiscenter.veracode.com/api/5.0/'
 
-app_types = ["Application Design/ Construction/IDE/Analysis",
+app_types = ["Application Design/Construction/IDE/Analysis",
              "Application Life-Cycle Management",
              "Application Server/Integration Server",
              "Back-Office Enterprise",
@@ -16,8 +18,8 @@ app_types = ["Application Design/ Construction/IDE/Analysis",
              "Content Management/Authoring",
              "Engineering",
              "Enterprise Resource Planning",
-             "Information Access/ Delivery/Mining/Portal",
-             "Information/ Data Management/Database",
+             "Information Access/Delivery/Mining/Portal",
+             "Information/Data Management/Database",
              "Middleware/Message-oriented/ Transaction",
              "Network Management",
              "Networking",
@@ -155,7 +157,7 @@ def begin_scan(credential, **payload):
     api_endpoint = 'beginscan.do'
     if payload['modules']:
         payload['modules'] = ', '.join(payload['modules'])
-    api_submit(api_endpoint, credential, payload)
+    return api_submit(api_endpoint, credential, payload)
 
 
 @main.command("begin-prescan")
@@ -189,6 +191,7 @@ def begin_prescan(credential, **payload):
 @click.option("--web-application", is_flag=True)
 @click.option("--archer-app-name")
 @click.option("--tags", "-t", help="Adds a tag. Can use multiple -t options for multiple tags")
+@click.pass_obj
 def create_app(credential, **payload):
     """Creates a new app."""
     api_endpoint = 'createapp.do'
@@ -208,6 +211,7 @@ def create_build(credential, **payload):
 
 
 @click.argument("app-id")
+@click.pass_obj
 def delete_app(credential, **payload):
     """Deletes an app."""
     api_endpoint = "deleteapp.do"
@@ -329,6 +333,7 @@ def remove_file(credential, **payload):
 @click.option("--tags", "-t", help="Adds a tag. Can use multiple -t options for multiple tags")
 @click.option("--custom-field-name")
 @click.option("--custom-field_value")
+@click.pass_obj
 def update_app(credential, **payload):
     """Updates an app. To add multiple custom fields, you have to call this api multiple times."""
     api_endpoint = 'updateapp.do'
@@ -357,11 +362,31 @@ def update_build(credential, **payload):
 @click.option('--sandbox-id')
 @click.option('--save-as')
 @click.pass_obj
-def upload_file(credential, **payload):
+def upload_file(credential, app_id, filename, sandbox_id, save_as):
     """Uploads a file"""
-    module_file = {'file': open(payload.pop('filename'), 'rb')}
+    fields = {'app_id': app_id}
+    if sandbox_id:
+        fields['sandbox_id'] = sandbox_id
+    if save_as:
+        fields['save_as'] = save_as
+    fields['file'] = (filename, open(filename, 'rb'), 'application/binary')
+    encoder = MultipartEncoder(fields=fields)
+    callback = create_callback(encoder)
+    monitor = MultipartEncoderMonitor(encoder, callback)
+
     api_endpoint = "uploadfile.do"
-    return api_submit(api_endpoint, credential, payload, module_file)
+    r = requests.post(VERACODE_API_URL + api_endpoint, data=monitor, headers={'Content-Type': encoder.content_type},
+                      auth=(credential.username, credential.password))
+    print(r.text)
+    return r
+
+
+def create_callback(encoder):
+    bar = ProgressBar(expected_size=encoder.len, filled_char='=')
+
+    def callback(monitor):
+        bar.show(monitor.bytes_read)
+    return callback
 
 
 def api_submit(api_endpoint, credential, payload=None, files=None):
